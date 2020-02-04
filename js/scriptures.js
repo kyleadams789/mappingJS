@@ -61,11 +61,20 @@ const Scriptures = (function () {
     /*------------------------------------------------------------------------
      *              PRIVATE METHOD DECLARATIONS
      */
+    let addMarker;
     let ajax;
     let bookChapterValid;
     let booksGrid;
     let booksGridContent;
+    let breadcrumbs;
     let cacheBooks;
+    let changeHash;
+    let chaptersGrid;
+    let chaptersGridContent;
+    let clearMarkers;
+    let encodedScripturesUrlParameters;
+    let getScripturesCallback;
+    let getScripturesFailure;
     let htmlAnchor;
     let htmlDiv;
     let htmlElement;
@@ -75,7 +84,13 @@ const Scriptures = (function () {
     let navigateBook;
     let navigateChapter;
     let navigateHome;
+    let nextChapter;
     let onHashChanged;
+    let previousChapter;
+    let setupMarkers;
+    let showLocation;
+    let titleForBookChapter;
+    let volumeForId;
     let volumesGridContent;
 
     /*------------------------------------------------------------------------
@@ -135,7 +150,7 @@ const Scriptures = (function () {
             });
         });
 
-        return gridContent + BOTTOM_PADDING;
+        return gridContent;
     };
 
     cacheBooks = function (onInitializedCallback) {
@@ -154,6 +169,34 @@ const Scriptures = (function () {
         if (typeof onInitializedCallback === "function") {
             onInitializedCallback();
         }
+    };
+
+    chaptersGrid = function (book) {
+        return htmlDiv({
+            classKey: CLASS_VOLUME,
+            content: htmlElement(TAG_VOLUME_HEADER, book.fullName)
+        }) + htmlDiv({
+            classKey: CLASS_BOOKS,
+            content: chaptersGridContent(book)
+        });
+    };
+
+    chaptersGridContent = function (book) {
+        let gridContent = "";
+        let chapter = 1;
+
+        while (chapter <= book.numChapters) {
+            gridContent += htmlLink({
+                classKey: `${CLASS_BUTTON} ${CLASS_CHAPTER}`,
+                id: chapter,
+                href: `#0:${book.id}:${chapter}`,
+                content: chapter
+            });
+
+            chapter += 1;
+        }
+
+        return gridContent;
     };
 
     htmlAnchor = function (volume) {
@@ -236,21 +279,37 @@ const Scriptures = (function () {
         });
     };
 
+    
+    navigateBook = function (bookId) {
+        let book = books[bookId];
+        let volume;
+
+        if (book.numChapters <= 1) {
+            navigateChapter(book.id, book.numChapters);
+        } else {
+            if (book !== undefined) {
+                volume = volumeForId(book.parentBookId);
+            }
+
+            document.getElementById(DIV_SCRIPTURES).innerHTML = htmlDiv({
+                id: DIV_SCRIPTURES_NAVIGATOR,
+                content: chaptersGrid(book)
+            });
+            //document.getElementById(DIV_BREADCRUMBS).innerHTML = breadcrumbs(volume, book);
+        }
+    };
+    
+    navigateChapter = function (bookId, chapter) {
+        console.log("navigateChapter " + bookId + ", " + chapter);
+    };
+    
     navigateHome = function (volumeId) {
         document.getElementById(DIV_SCRIPTURES).innerHTML = htmlDiv({
             id: DIV_SCRIPTURES_NAVIGATOR,
             content: volumesGridContent(volumeId)
         });
     };
-
-    navigateBook = function (bookId) {
-        console.log("navigateBook " + bookId);
-    };
-
-    navigateChapter = function (bookId, chapter) {
-        console.log("navigateChapter " + bookId + ", " + chapter);
-    };
-
+    
     onHashChanged = function () {
         let ids = [];
 
@@ -286,6 +345,12 @@ const Scriptures = (function () {
                     }
                 }
             }
+        }
+    };
+
+    volumeForId = function (volumeId) {
+        if (volumeId !== undefined && volumeId > 0 && volumeId <= volumes.length) {
+            return volumes[volumeId - 1];
         }
     };
 
