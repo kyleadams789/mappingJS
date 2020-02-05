@@ -117,6 +117,7 @@ const Scriptures = (function () {
         request.onerror = failureCallback;
         request.send();
     };
+
     bookChapterValid = function (bookId, chapter) {
         let book = books[bookId];
 
@@ -145,7 +146,7 @@ const Scriptures = (function () {
             gridContent += htmlLink({
                 classKey: CLASS_BUTTON,
                 id: book.id,
-                href: "#${volume.id}:${book.id}",
+                href: `#${volume.id}:${book.id}`,
                 content: book.gridName
             });
         });
@@ -278,7 +279,6 @@ const Scriptures = (function () {
             }
         });
     };
-
     
     navigateBook = function (bookId) {
         let book = books[bookId];
