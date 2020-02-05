@@ -330,6 +330,9 @@ const Scriptures = (function () {
     };
 
     navigateChapter = function (bookId, chapter) {
+        console.log(nextChapter(bookId, chapter));
+        console.log(previousChapter(bookId, chapter));
+
         ajax(encodedScripturesUrlParameters(bookId, chapter), getScripturesCallback, getScripturesFailure, true);
     };
 
@@ -372,6 +375,7 @@ const Scriptures = (function () {
                 ];
             }
         }
+        console.log(bookId, chapter);
     };
 
     onHashChanged = function () {
@@ -416,13 +420,41 @@ const Scriptures = (function () {
     // Returns undefined if there is no previous chapter
     // Otherwise returns an array with the previous book ID, chapter, and title
     previousChapter = function (bookId, chapter) {
+        let book = books[bookId];
+
         // Get the book for the given bookId.  If it exists (i.e. it’s not undefined):
-        //     If chapter > 1, it’s the easy case.  Just return same bookId,
-        //         chapter - 1, and the title string for that book/chapter combo.
-        //     Otherwise we need to see if there’s a previous book:
-        //         Get the book for bookId - 1.  If it exists:
-        //             Return bookId - 1, the last chapter of that book, and the
-        //                     title string for that book/chapter combo.
+        if (book !== undefined) {
+            //     If chapter > 1, it’s the easy case.  
+            //     Just return same bookId,
+            //     chapter - 1, and the title string for that book/chapter combo.
+            if (chapter > 1) {
+                return [
+                    bookId,
+                    chapter - 1,
+                    titleForBookChapter(book, chapter - 1)
+                ];
+            }
+
+            let previousBook = books[bookId - 1];
+
+            //     Otherwise we need to see if there’s a previous book:
+            //         Get the book for bookId - 1.  If it exists:
+            if (previousBook !== undefined) {
+                let previousChapterValue = 0;
+
+                if (previousBook.numChapters > 0) {
+                    previousChapterValue = previousBook.numChapters;
+                }
+
+                // Return bookId - 1, the last chapter of that book, and the
+                //   title string for that book/chapter combo.
+                return [
+                    bookId - 1,
+                    previousChapterValue,
+                    titleForBookChapter(previousBook, previousChapterValue)
+                ];
+            }
+        }
         // If we didn’t already return a 3-element array of bookId/chapter/title,
         //     at this point just drop through to the bottom of the function.  We’ll
         //     return undefined by default, meaning there is no previous chapter.
