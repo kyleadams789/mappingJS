@@ -14,12 +14,10 @@
     clearTimeout, content, exec, forEach, fullName, getAttribute,
     getElementById, google, gridName, hash, href, id, init, innerHTML, lat,
     length, lng, log, map, maps, maxBookId, minBookId, numChapters,
-    onHashChanged, onclick, onerror, onload, open, parse, position, push,
+    onHashChanged, onclick, onerror, onload, open, parentBookId, parse, position, push,
     querySelectorAll, response, send, setMap, setTimeout, showLocation, slice,
     split, status, title, tocName
 */
-
-
 
 const Scriptures = (function () {
     "use strict";
@@ -96,13 +94,13 @@ const Scriptures = (function () {
     /*------------------------------------------------------------------------
      *              PRIVATE METHOD DECLARATIONS
      */
-    ajax = function (url, successCallback, failureCallback) {
+    ajax = function (url, successCallback, failureCallback, skipJsonParse) {
         let request = new XMLHttpRequest();
         request.open(REQUEST_GET, url, true);
 
         request.onload = function () {
             if (request.status >= REQUEST_STATUS_OK && request.status < REQUEST_STATUS_ERROR) {
-                let data = JSON.parse(request.response);
+                let data = skipJsonParse ? request.response : JSON.parse(request.response);
 
                 if (typeof successCallback === "function") {
                     successCallback(data);
@@ -200,6 +198,31 @@ const Scriptures = (function () {
         return gridContent;
     };
 
+    encodedScripturesUrlParameters = function (bookId, chapter, verses, isJst) {
+        if (bookId !== undefined && chapter !== undefined) {
+            let options = "";
+
+            if (verses !== undefined) {
+                options += verses;
+            }
+
+            if (isJst !== undefined) {
+                options += "&jst=JST";
+            }
+
+            return `${URL_SCRIPTURES}?book=${bookId}&chap=${chapter}&verses${options}`;
+        }
+    };
+
+    getScripturesCallback = function (chapterHtml) {
+        document.getElementById(DIV_SCRIPTURES).innerHTML = chapterHtml;
+        //NEEDS WORK - setupMarkers();
+    };
+
+    getScripturesFailure = function () {
+        console.log("Unable to retrieve chapter content from server.");
+    };
+
     htmlAnchor = function (volume) {
         return `<a name="v${volume.id}" />`;
     };
@@ -279,7 +302,7 @@ const Scriptures = (function () {
             }
         });
     };
-    
+
     navigateBook = function (bookId) {
         let book = books[bookId];
         let volume;
@@ -298,18 +321,19 @@ const Scriptures = (function () {
             //document.getElementById(DIV_BREADCRUMBS).innerHTML = breadcrumbs(volume, book);
         }
     };
-    
+
     navigateChapter = function (bookId, chapter) {
-        console.log("navigateChapter " + bookId + ", " + chapter);
+        ajax(encodedScripturesUrlParameters(bookId, chapter), getScripturesCallback, getScripturesFailure, true);
+
     };
-    
+
     navigateHome = function (volumeId) {
         document.getElementById(DIV_SCRIPTURES).innerHTML = htmlDiv({
             id: DIV_SCRIPTURES_NAVIGATOR,
             content: volumesGridContent(volumeId)
         });
     };
-    
+
     onHashChanged = function () {
         let ids = [];
 
