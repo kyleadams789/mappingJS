@@ -21,6 +21,8 @@
         <div id="map"></div>
     </div>
     <script type="text/javascript">
+        //let showLocation; //can use instead of showlocation() below
+
         function ready(fn) {
             if (document.readyState != 'loading') {
                 fn();
@@ -32,7 +34,7 @@
         ready(function () {
             Scriptures.init(() => { Scriptures.onHashChanged(); });
             window.addEventListener("hashchange", Scriptures.onHashChanged);
-            showLocation = Scriptures.showLocation;
+            //showLocation = Scriptures.showLocation; //can use instead of showlocation() below
         });
 
         let map;
@@ -43,8 +45,13 @@
                 zoom: 8
             });
         }
+
+        
+        function showLocation(geotagId, placename, latitude, longitude, viewLatitude, viewLongitude, viewTilt, viewRoll, viewAltitude, viewHeading) {
+            Scriptures.showLocation(geotagId, placename, latitude);
+        }
     </script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR-API-KEY&callback=initMap"
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR-API-KEY=initMap"
         async defer>
     </script>
 </body>

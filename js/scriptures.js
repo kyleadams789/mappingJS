@@ -55,9 +55,8 @@ const Scriptures = (function () {
      */
     let books;
     let gmMarkers = [];
-    let volumes;
     let retryDelay = 500;
-
+    let volumes;
 
     /*------------------------------------------------------------------------
      *              PRIVATE METHOD DECLARATIONS
@@ -94,15 +93,13 @@ const Scriptures = (function () {
     let volumeForId;
     let volumesGridContent;
 
-    let testFunction;
-
     /*------------------------------------------------------------------------
      *              PRIVATE METHOD DECLARATIONS
      */
-
     addMarker = function (placename, latitude, longitude) {
         //TODO - check to see if already have this lat/long in the gmMarkersArray
         //TODO - create marker and append to gmMarkers
+
         let marker = new google.maps.Marker({
             position: {lat: Number(latitude), lng: Number(longitude)},
             map, //same as <map: map,>
@@ -369,10 +366,6 @@ const Scriptures = (function () {
         });
     };
 
-    testFunction = function (words) {
-        console.log(words);
-    };
-
     nextChapter = function (bookId, chapter) {
         let book = books[bookId];
 
@@ -401,7 +394,6 @@ const Scriptures = (function () {
                 ];
             }
         }
-        console.log(bookId, chapter);
     };
 
     onHashChanged = function () {
@@ -496,6 +488,7 @@ const Scriptures = (function () {
             if (retryDelay > MAX_RETRY_DELAY) {
                 window.clearTimeout(retryId);
             }
+
             return;
         }
 
@@ -519,6 +512,17 @@ const Scriptures = (function () {
                 addMarker(placename, latitude, longitude);
             }
         });
+    };
+
+    
+    
+    
+
+    showLocation = function (id, placename, latitude) {
+        console.log(id);
+        console.log(placename);
+        console.log(latitude);
+        //console.log(arguments);
     };
 
     //return string showing chapter name (for onHover)
@@ -560,6 +564,7 @@ const Scriptures = (function () {
      */
     return {
         init,
-        onHashChanged
+        onHashChanged,
+        showLocation
     };
 }());
