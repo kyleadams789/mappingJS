@@ -8,7 +8,7 @@
 /*jslint
     browser: true
     long: true */
-/*global console, XMLHttpRequest */
+/*global console, google, map, XMLHttpRequest */
 /*property
     Animation, DROP, Marker, animation, books, changeHash, classKey,
     clearTimeout, content, exec, forEach, fullName, getAttribute,
@@ -56,6 +56,7 @@ const Scriptures = (function () {
     let books;
     let gmMarkers = [];
     let volumes;
+    let retryDelay = 500;
 
 
     /*------------------------------------------------------------------------
@@ -102,7 +103,14 @@ const Scriptures = (function () {
     addMarker = function (placename, latitude, longitude) {
         //TODO - check to see if already have this lat/long in the gmMarkersArray
         //TODO - create marker and append to gmMarkers
-        console.log(placename, latitude, longitude);
+        let marker = new google.maps.Marker({
+            position: {lat: Number(latitude), lng: Number(longitude)},
+            map, //same as <map: map,>
+            title: placename,
+            animation: google.maps.Animation.DROP
+        });
+        
+        gmMarkers.push(marker);
     };
 
     ajax = function (url, successCallback, failureCallback, skipJsonParse) {
@@ -442,7 +450,7 @@ const Scriptures = (function () {
 
         // Get the book for the given bookId.  If it exists (i.e. it’s not undefined):
         if (book !== undefined) {
-            //     If chapter > 1, it’s the easy case.  
+            //     If chapter > 1, it’s the easy case.
             //     Just return same bookId,
             //     chapter - 1, and the title string for that book/chapter combo.
             if (chapter > 1) {
@@ -480,6 +488,17 @@ const Scriptures = (function () {
     };
 
     setupMarkers = function () {
+        if (window.google === undefined) {
+            let retryId = window.setTimeout(setupMarkers, retryDelay);
+
+            retryDelay += retryDelay;
+
+            if (retryDelay > MAX_RETRY_DELAY) {
+                window.clearTimeout(retryId);
+            }
+            return;
+        }
+
         if (gmMarkers.length > 0) {
             clearMarkers();
         }
