@@ -54,7 +54,9 @@ const Scriptures = (function () {
      *              PRIVATE VARIABLES
      */
     let books;
+    let gmMarkers = [];
     let volumes;
+
 
     /*------------------------------------------------------------------------
      *              PRIVATE METHOD DECLARATIONS
@@ -96,6 +98,13 @@ const Scriptures = (function () {
     /*------------------------------------------------------------------------
      *              PRIVATE METHOD DECLARATIONS
      */
+
+    addMarker = function (placename, latitude, longitude) {
+        //TODO - check to see if already have this lat/long in the gmMarkersArray
+        //TODO - create marker and append to gmMarkers
+        console.log(placename, latitude, longitude);
+    };
+
     ajax = function (url, successCallback, failureCallback, skipJsonParse) {
         let request = new XMLHttpRequest();
         request.open(REQUEST_GET, url, true);
@@ -204,6 +213,14 @@ const Scriptures = (function () {
         return gridContent;
     };
 
+    clearMarkers = function () {
+        gmMarkers.forEach(function (marker) {
+            marker.setMap(null);
+        });
+
+        gmMarkers = []; //clear array
+    };
+
     encodedScripturesUrlParameters = function (bookId, chapter, verses, isJst) {
         if (bookId !== undefined && chapter !== undefined) {
             let options = "";
@@ -223,6 +240,7 @@ const Scriptures = (function () {
     getScripturesCallback = function (chapterHtml) {
         document.getElementById(DIV_SCRIPTURES).innerHTML = chapterHtml;
         //NEEDS WORK - setupMarkers();
+        setupMarkers();
     };
 
     getScripturesFailure = function () {
@@ -459,6 +477,29 @@ const Scriptures = (function () {
         //     at this point just drop through to the bottom of the function.  We’ll
         //     return undefined by default, meaning there is no previous chapter.
         console.log(bookId, chapter);
+    };
+
+    setupMarkers = function () {
+        if (gmMarkers.length > 0) {
+            clearMarkers();
+        }
+
+        document.querySelectorAll("a[onclick^=\"showLocation(\"]").forEach(function (element) {
+            let matches = LAT_LON_PARSER.exec(element.getAttribute("onclick"));
+
+            if (matches) {
+                let placename = matches[INDEX_PLACENAME];
+                let latitude = matches[INDEX_LATITUDE];
+                let longitude = matches[INDEX_LONGITUDE];
+                let flag = matches[INDEX_FLAG];
+
+                if (flag !== "") {
+                    placename += ` ${flag}`;
+                }
+
+                addMarker(placename, latitude, longitude);
+            }
+        });
     };
 
     //return string showing chapter name (for onHover)
